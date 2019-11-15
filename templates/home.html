@@ -4,42 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>App Weather</title>
+    <title>What's the weather like?</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
             <div class="col-12 p-0">
                 <div class="jumbotron min-vh-100 text-center m-0 d-flex flex-column justify-content-center">
-                    <h1 class="display-4">Weather</h1>
-                    <form action="">
-                        <div class="col-6 offset-md-3">
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="What's location you find?" aria-label="Recipient's username" aria-describedby="basic-addon2">
-                                <div class="input-group-append">
-                                    <button class="btn btn-primary" id="search" type="button">Search</button>
-                                </div>
+                    <h3>What's the weather like?</h3>
+                    <br>
+                    <div class="col-6 offset-md-3">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" id="locationName" placeholder="What's location you find?" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" id="search" type="button">Search</button>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="row" style="margin-top: 5rem">
-            <div class="col-6 offset-3">
-                12
+        <div class="row" style="margin-top: 4rem">
+            <div class="col-6 offset-3" id="content">
             </div>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script>
         $(document).ready(function () {
+            $('#locationName').keydown(function(event) {
+                if (event.keyCode == 13) {
+                   $('#search').click()
+                }
+            });
             $("#search").click(function (e) {
-                alert("aaaa");
-                e.preventDefault()
+                var html = ''
+                html += '<div class="col-12 text-center">'
+                html += '<i class="fa fa-spin fa-spinner" style="font-size: 40px"></i>'
+                html += '</div>'
+
+                $("#content").html(html);
+                
+                setTimeout(() => {
+                    $.ajax({
+
+                        type: "POST",
+
+                        url: "{% url 'api-location' %}",
+
+                        data: {
+                            name: $("#locationName").val()
+                        },
+
+                        success: function (data)
+
+                        {
+                            if (data.error === true) {
+                                return false;
+                            }
+
+                            if (data.resp.cod == 404) {
+                                var html = ''
+                                html += '<div class="col-12 text-center">'
+                                html += '<i>City not found!</i>'
+                                html += '</div>'
+
+                                $("#content").html(html);
+                                return false;
+                            }
+                            var reponse = data.resp
+                            var html = '';
+                            setTimeout(() => {
+                                html += '<div class="card">';
+                                html += '<div class="card-body">';
+                                html += '<div class="media-left" style="width: 30%; float: left;">';
+                                html += '<figure class="image is-50x50">';
+                                html += '<img style="width: 100px" src="http://openweathermap.org/img/w/'+ reponse.weather[0].icon +'.png" alt="Image">';
+                                html += '</figure>';
+                                html += '</div>';
+                                html += '<div class="media-content">';
+                                html += '<div class="content">';
+                                html += '<h5 class="card-title">' + reponse.name + ', ' + reponse.sys.country + '</h5>';
+                                html += '<b class="card-text">'+ reponse.main.temp + '° F </b>';
+                                html += '<p class="card-text">'+ reponse.weather[0].description + '</p>';
+                                html += '</div>';
+
+                                $("#content").html(html);
+                            }, 1000);
+                        },
+
+                        statusCode: {
+
+                            404: function() {
+
+                                console.log('Oops" ,  "File Not Found!" ,  "error"')
+
+                            }
+
+                        },
+
+                        error: function (jqXHR, textStatus, errorThrown ) {
+                            console.log('error', errorThrown)
+
+                        }
+
+                        });
+                    return false;
+                }, 500);
             });
          });
     </script>

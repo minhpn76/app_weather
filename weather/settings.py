@@ -25,7 +25,7 @@ SECRET_KEY = '0+tn*3#%j0b_&41p22wy$jyn9dej+1e=738w(ci(@x#7(jw-&^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -37,17 +37,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api'
+    'api',
+    'rest_framework',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware'
 ]
 
 ROOT_URLCONF = 'weather.urls'
@@ -55,6 +58,35 @@ ROOT_URLCONF = 'weather.urls'
 TEMPLATE_PATH_DEFAULT = os.path.join(os.path.abspath(os.path.dirname(__file__)),
 						"../templates")
 TEMPLATE_PATH = os.environ.get("TEMPLATE_PATH", TEMPLATE_PATH_DEFAULT)
+
+INTERNAL_IPS = ["127.0.0.1"]
+# CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = (
+    "http://127.0.0.1:8000",
+    "http://localhost:8000"
+)
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "accept-encoding",
+    "accept-language",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "langcode",
+    "x-requested-with",
+)
+
 
 TEMPLATES = [
     {
